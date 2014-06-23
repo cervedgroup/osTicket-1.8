@@ -140,8 +140,8 @@ class TicketsAjaxAPI extends AjaxController {
                 break;
         }
 
-        //Assignee
-        if(isset($req['assignee']) && strcasecmp($req['status'], 'closed'))  {
+    //Assignee
+        if($req['assignee']) {
             $id=preg_replace("/[^0-9]/", "", $req['assignee']);
             $assignee = $req['assignee'];
             $where.= ' AND ( ( ticket.status="open" ';
@@ -157,13 +157,15 @@ class TicketsAjaxAPI extends AjaxController {
             if($req['staffId'] && !$req['status']) //Assigned TO + Closed By
                 $where.= ' OR (ticket.staff_id='.db_input($req['staffId']). ' AND ticket.status="closed") ';
             elseif(isset($req['staffId'])) // closed by any
-                $where.= ' OR ticket.status="closed" ';
+                // REMOVED $where.= ' OR ticket.status="closed" ';
 
             $where.= ' ) ';
-        } elseif($req['staffId']) {
-            $where.=' AND (ticket.staff_id='.db_input($req['staffId']).' AND ticket.status="closed") ';
+        } 
+		if ($req['staffId']) {
+		$where.=' AND (ticket.staff_id='.db_input($req['staffId']).' AND ticket.status="closed") ';
         }
-
+        
+        
         //dates
         $startTime  =($req['startDate'] && (strlen($req['startDate'])>=8))?strtotime($req['startDate']):0;
         $endTime    =($req['endDate'] && (strlen($req['endDate'])>=8))?strtotime($req['endDate']):0;
